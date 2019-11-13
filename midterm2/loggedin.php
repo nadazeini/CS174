@@ -34,10 +34,16 @@ if ($conn->connect_error) {
     </form>
     
  _END;
- 
+ function mysql_entities_fix_string($connection, $string) {
+    return htmlentities(mysql_fix_string($connection, $string));
+}
+function mysql_fix_string($connection, $string) {
+    if (get_magic_quotes_gpc()) $string = stripslashes($string);
+        return $connection->real_escape_string($string);
+}
  if (isset($_POST['adminsubmit'])) {
     if ($_FILES['adminfile']['type'] == 'text/plain'){
-        $name = mysqli_real_escape_string($conn, $_POST['name']);
+        $name = mysql_entities_fix_string($conn, $_POST['name']);
     $file = addslashes(file_get_contents($_FILES["adminfile"]["tmp_name"],FALSE,null,0,20));
  
    

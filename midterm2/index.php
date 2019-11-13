@@ -1,4 +1,5 @@
 <?php
+//CREATE TABLE malware(name VARCHAR(32) NOT NULL, content VARCHAR(32));
 require_once 'login.php';
 $conn = new mysqli($hn,$un,$pw,$db);
 if($conn->connect_error){

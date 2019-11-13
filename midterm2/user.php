@@ -10,6 +10,7 @@ function mysql_fatal_error($msg,$conn){
 
     _END;
 }
+
 $conn = new mysqli($hn, $un, $pw, $db);
 if ($conn->connect_error) {
     return mysql_fatal_error($msg,$conn);

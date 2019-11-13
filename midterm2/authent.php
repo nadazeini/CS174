@@ -14,30 +14,47 @@ $conn = new mysqli($hn, $un, $pw, $db);
 if ($conn->connect_error) {
     return mysql_fatal_error($msg,$conn);
 }
-
-
-
-
-$username = 'admin';
-$password = 'letmein';//to store in database
-if(isset($_POST['PHP_AUTH_USER']) && isset($_POST['PHP_AUTH_PW'])){
-    if($_POST['PHP_AUTH_USER']==$username && $_POST['PHP_AUTH_PW']==$password){
-    //  echo "Welcome User:" .$_SERVER['PHP_AUTH_USER']."Password:".$_SERVER['PHP_AUTH_PW'];
-    header("Location: loggedin.php");
-    exit();
-    }
-    else{
-        die("Invalid password/username");
-
-    _END;
-    
-    }
+function mysql_entities_fix_string($connection, $string) {
+    return htmlentities(mysql_fix_string($connection, $string));
+}
+function mysql_fix_string($connection, $string) {
+    if (get_magic_quotes_gpc()) $string = stripslashes($string);
+        return $connection->real_escape_string($string);
 }
 
+function get_post($conn, $var)
+{
+    return $conn->real_escape_string($_POST[$var]);
+
+}
+
+if(isset($_POST['PHP_AUTH_USER']) && isset($_POST['PHP_AUTH_PW'])){
+  $un_temp = mysql_entities_fix_string($conn,$_POST['PHP_AUTH_USER']);
+  $pw_temp = mysql_entities_fix_string($conn,$_POST['PHP_AUTH_PW']);
+  $query = "SELECT * FROM users WHERE username='$un_temp'";
+$result = $conn->query($query);
+if (!$result) {
+    $msg = "Error in retrieving result: ";
+    die(mysql_fatal_error($msg, $conn));
+}
+else {
+ //   $rows = $result->num_rows;
+$row = $result->fetch_array(MYSQLI_NUM);
+$result->close;
+
+$salt1 = $row[2];
+$salt2= $row[3];
+$token =  hash('ripemd128',"$salt1$pw_temp$salt2");
+if($token == $row[1]){
+header("Location: loggedin.php");
+exit(); }
 else{
-   //header('WWW-Authenticate:Basic realm= "Restricted Section'); //basic realm is the name of the scteuon that is protected 
-    //and appears part of the pop-up prompt
-    //head('HTTP/1.0 401 Unauthorized');
+        die("Invalid password/username");   
+
+    }
+}
+}
+else{
     echo <<<_END
 <form action="authent.php" method="post">
 <pre> <h2>ADMIN LOG-IN</h2> 
@@ -52,4 +69,6 @@ Password: <input type = "text" name ="PHP_AUTH_PW">
 _END;
     die("Please enter your username and password");
 }
+$conn->close();
+
 ?>
