@@ -2,6 +2,6 @@
 
 $hn = 'localhost';
 $un = 'root';
-$pw = 'nadatafa';
+$pw = 'pw';
 $db = 'midterm2';
 ?>
